@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Image</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Upload Your Image</h1>
+        <div class="btn-con">
+            <input type="file" id="file" accept="image/*">
+            <label for="file" class="file-label">
+                Choose an image
+            </label>
+            <button id="upload">Upload</button>
+        </div>
+        <div id="preview"></div>
+        <div id="response-message"></div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file');
+        const preview = document.getElementById('preview');
+        const uploadButton = document.getElementById('upload');
+        const responseMessage = document.getElementById('response-message');
+
+        
+        uploadButton.addEventListener('click', async function () {
+            const file = fileInput.files[0];
+            if (!file) {
+                responseMessage.textContent = "Please select an image to upload.";
+                return;
+            }
+
+            preview.innerHTML = `<h1>Loading...</h1>`;
+
+            
+            const formData = new FormData();
+            formData.append("picture", file);
+
+            try {
+                const response = await fetch('http://localhost:3000/api/picture/upload-picture', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to upload image');
+                }
+
+                const result = await response.json();
+                const imageUrl = result.picture.pictureName;
+
+                // console.log(result);
+                // console.log(imageUrl);
+
+                preview.innerHTML = `<img src="${imageUrl}" alt="Image Preview" style="max-width: 300px; max-height: 300px;">`;
+                responseMessage.innerHTML = `<h5>Upload successful!</h5>`;
+                console.log('Upload result:', result);
+            } catch (error) {
+                responseMessage.innerHTML = `<h2>Error during upload: ${error.message}</h2>`;
+                console.error('Error during upload:', error);
+            }
+        });
+    </script>
+</body>
+
+</html>
